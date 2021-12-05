@@ -10,13 +10,25 @@ Application note on how to operate PN5180 without a [library](https://www.nxp.co
 
 ## Board
 
-You will find different implementation of this board. All boards should have full SPI pins plus the reset and busy ones and additionnaly 5V and or 3.3V plus ground. This pictures shows an example of one of the implementation connected with a [FT4222](../FT4222/README.md) chipset to provide the necessary GPIO and SPI features:
-
-![PN5180](./samples/pn8150_ft4222.png)
+You will find different implementation of this board. All boards should have full SPI pins plus the reset and busy ones and additionally 5V and or 3.3V plus ground. 
 
 ## Usage
 
-You will find a full example in the [samples directory](./samples/Pn5180sample.cs). This example covers the usage of most of the public functions and properties. This example shows as well how to use [Ultralight cards](../Card/Ultralight).
+**Important**: make sure you properly setup the SPI pins especially for ESP32 before creating the `SpiDevice`, make sure you install the `nanoFramework.Hardware.ESP32 nuget`:
+
+```csharp
+//////////////////////////////////////////////////////////////////////
+// when connecting to an ESP32 device, need to configure the SPI GPIOs
+// used for the bus
+Configuration.SetPinFunction(21, DeviceFunction.SPI1_MOSI);
+Configuration.SetPinFunction(22, DeviceFunction.SPI1_MISO);
+Configuration.SetPinFunction(23, DeviceFunction.SPI1_CLOCK);
+// Make sure as well you are using the right chip select
+```
+
+For other devices like STM32, please make sure you're using the preset pins for the SPI bus you want to use. The chip select can as well be pre setup.
+
+You will find a full example in the [samples directory](./samples/Program.cs). This example covers the usage of most of the public functions and properties. This example shows as well how to use [Ultralight cards](../Card/Ultralight).
 
 PN5180 is operated thru SPI and GPIO. GPIO is used to control the SPI behavior as the PN5180 is using SPI in specific way. This does then require to manually manage the pin selection for SPI. And another pin called pin busy is used to understand when the PN5180 is available to receive and send information.
 
@@ -64,7 +76,7 @@ do
         Thread.Sleep(300);
     }
 }
-while (!Console.KeyAvailable);
+while (true);
 ```
 
 And for an ISO 14443 Type B card:
@@ -106,7 +118,7 @@ do
         Debug.WriteLine($"ERROR: Card can't be unselected");
     }
 }
-while (!Console.KeyAvailable);
+while (true);
 ```
 
 Please note that the ```ListenToCardIso14443TypeA``` and ```ListenToCardIso14443TypeB``` can be configured with different transceiver and receiver configurations. Usually the configuration need to match but you can adjust and change them. See the section with Radio Frequency configuration for more information.
@@ -266,7 +278,7 @@ else
 }
 ```
 
-The [example](./samples/Pn5180sample.cs) contains as well an implementation to fully dump the content of other cards.
+The [example](./samples/Program.cs) contains as well an implementation to fully dump the content of other cards.
 
 ## Current implementation
 

@@ -29,6 +29,8 @@ steps:
 # need this here in order to persist GitHub credentials 
 - checkout: self
   submodules: true
+- checkout: templates
+  fetchDepth: 1
 
 - script: |
     git config --global user.email "nanoframework@outlook.com"
@@ -46,37 +48,6 @@ steps:
     custom: tool
     arguments: install -g nbgv
 
-- script: nbgv cloud -a -c
-  condition: succeeded()
-  displayName: Set build number
-
-- task: PowerShell@2
-  condition: succeeded()
-  displayName: Get NuGet build number
-  inputs:
-    targetType: 'inline'
-    script: |
-      $MyNuGetVersion = $env:NBGV_NuGetPackageVersion -replace ".g$env:NBGV_GitCommitIdShort", ""
-
-      # replace preview with alpha if this is a PR build
-      if($env:System_PullRequest_PullRequestId -ne $null)
-      {
-          # mix PR and VersionHeight
-          $alphaNumber = [int]$env:System_PullRequest_PullRequestNumber + $env:NBGV_VersionHeight;
-
-          $alphaPrString = "alpha." + $alphaNumber.ToString()
-          $MyNuGetVersion = $MyNuGetVersion -replace "preview", $alphaPrString
-      }
-      if ($env:System_PullRequest_SourceBranch -like 'release*')
-      {
-          $MyNuGetVersion = $MyNuGetVersion + "-rc." + $env:NBGV_VersionHeight
-      }
-
-      Write-Host "NuGet build is: $MyNuGetVersion"
-      Write-Host "Assembly version is: $env:NBGV_AssemblyVersion"
-
-      Write-Host "$("##vso[task.setvariable variable=MY_NUGET_VERSION]")$MyNuGetVersion"
-
 - task: InstallnFBuildComponents@1
   condition: succeeded()
   displayName: Install nanoFramework MSBuild components
@@ -90,13 +61,17 @@ steps:
         $msbuild = join-path $msbuild 'MSBuild\Current\Bin\MSBuild.exe'
     }
 
-    $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)"))))"
+    $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:${env:MY_GITHUBTOKEN}"))))"
   
     if($env:DEVICE_TO_BUILD -eq "")
     {
         if($env:System_PullRequest_PullRequestId -ne $null)
         {
-            Write-host "Building from PR"
+            "" | Write-Host -ForegroundColor Yellow
+            "**********************" | Write-Host -ForegroundColor Yellow
+            "* Building from a PR *" | Write-host -ForegroundColor Yellow
+            "**********************" | Write-Host -ForegroundColor Yellow
+            "" | Write-Host -ForegroundColor Yellow
 
             # get files changed in PR, if this is a PR
             # can get max of 100 files using this method (for more requires paging)
@@ -107,7 +82,11 @@ steps:
         }
         else
         {
-            Write-host "Building from a commit"
+            "" | Write-Host -ForegroundColor Yellow
+            "**************************" | Write-Host -ForegroundColor Yellow
+            "* Building from a commit *" | Write-host -ForegroundColor Yellow
+            "**************************" | Write-Host -ForegroundColor Yellow
+            "" | Write-Host -ForegroundColor Yellow
 
             # get files changed in the commit, if this is NOT a PR
             $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nanoFramework.IoT.Device/commits/$(Build.SourceVersion)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
@@ -136,9 +115,9 @@ steps:
         $results = [Regex]::Matches($files1, $pattern)
 
         # get unique folder names
-        $deviceFolders = $results | Sort-Object |  Select-Object | Foreach-Object {$_.Groups["folder"].Value} | Get-Unique 
+        $deviceFolders = $results | Sort-Object | Select-Object | Foreach-Object {$_.Groups["folder"].Value} | Get-Unique 
 
-        Write-host "Found $($deviceFolders.count) packages to build"
+        Write-host "Found $($deviceFolders.count) package(s) to build"
     }
     else
     {
@@ -148,12 +127,16 @@ steps:
         $deviceFolders.Add("$env:DEVICE_TO_BUILD")
     }
 
+    # flag for any build 'failure'
+    $buildFailed = $false
+
     foreach ($folder in $deviceFolders)
     {
         "" | Write-Host -ForegroundColor Yellow
         "***********************" | Write-Host -ForegroundColor Yellow
+        "Processing binding '$folder'..." | Write-Host -ForegroundColor Yellow
         "***********************" | Write-Host -ForegroundColor Yellow
-        "Processing '$folder'..." | Write-Host -ForegroundColor Yellow
+        "" | Write-Host -ForegroundColor Yellow
         
         # try to find the solution
         $solutionFile = Get-ChildItem -Path "devices\$folder\" -Include "$folder.sln" -Recurse
@@ -165,7 +148,11 @@ steps:
         }
         else
         {
-            "Solution file is: '$solutionFile'" | Write-Host -ForegroundColor Yellow
+            "" | Write-Host -ForegroundColor Yellow
+            "*************************" | Write-Host -ForegroundColor Yellow
+            "Processing '$solutionFile'" | Write-Host -ForegroundColor Yellow
+            "*************************" | Write-Host -ForegroundColor Yellow
+            "" | Write-Host -ForegroundColor Yellow
         }
 
         # try to find the nuspec
@@ -183,15 +170,101 @@ steps:
 
         # need to restore NuGets first
         nuget restore $solutionFile
+        if (-not $?) { throw "Error restoring '$solutionFile'" }
 
-        # build solution
-        & "$msbuild" "$solutionFile" /verbosity:normal /p:Configuration=Release
+        # for NFC solutions the projects on Card solution needs to be restored too
+        if ($solutionFile.Name -eq "Mfrc522.sln" -or
+            $solutionFile.Name -eq "Pn5180.sln" -or 
+            $solutionFile.Name -eq "Pn532.sln")
+        {
+            nuget restore devices\Card\Card.sln
+        }
 
-        # package NuGet
-        nuget pack $nuspecFile -Version $(MY_NUGET_VERSION) -properties commit="$(Build.SourceVersion)" -OutputDirectory $env:Agent_TempDirectory
+        try
+        {
+            Clear-Variable LastExitCode
+
+            ########################
+            # perform versions check
+            Invoke-Expression "$(Pipeline.Workspace)/s/nf-tools/azure-pipelines-scripts/versions-check.ps1 -SolutionToCheck $solutionFile -WorkingDirectory $(Build.SourcesDirectory)\nanoFramework.IoT.Device\devices\$folder\ -NuspecFile $nuspecFile"
+            
+            if($LASTEXITCODE -eq 0)
+            {
+                "" | Write-Host -ForegroundColor Yellow
+                "***********************" | Write-Host -ForegroundColor Yellow
+                "Building '$solutionFile'" | Write-Host -ForegroundColor Yellow
+                "***********************" | Write-Host -ForegroundColor Yellow
+                "" | Write-Host -ForegroundColor Yellow
+
+                #############
+                # get version
+                $nbgvArgs = @('get-version', '-p', "$(Build.SourcesDirectory)\nanoFramework.IoT.Device\devices\$folder", '-f', 'json')
+                $versionData = & 'nbgv' $nbgvArgs | ConvertFrom-Json
+
+                $versionReplacement = "-g"+$versionData.GitCommitIdShort
+                $MyNuGetVersion = $versionData.NuGetPackageVersion -replace $versionReplacement, ""
+
+                # replace preview with alpha if this is a PR build
+                if($env:System_PullRequest_PullRequestId -ne $null)
+                {
+                    # mix PR and VersionHeight
+                    $alphaNumber = [int]$env:System_PullRequest_PullRequestNumber + $versionData.VersionHeight;
+          
+                    $alphaPrString = "-alpha." + $alphaNumber.ToString()
+                    $MyNuGetVersion = $MyNuGetVersion+$alphaPrString
+                }
+                if ($env:System_PullRequest_SourceBranch -like 'release*')
+                {
+                    $MyNuGetVersion = $MyNuGetVersion + "-rc." + $versionData.VersionHeight
+                }
+          
+                Write-Host "NuGet build is: $MyNuGetVersion"
+                Write-Host "Assembly version is: "+$versionData.AssemblyVersion
+    
+                ################
+                # build solution
+                & "$msbuild" "$solutionFile" /verbosity:normal /p:Configuration=Release
+                if (-not $?) { throw "Error building '$solutionFile'" }
+    
+                ###############
+                # package NuGet
+                nuget pack $nuspecFile -Version $MyNuGetVersion -Symbols -SymbolPackageFormat snupkg -properties commit="$(Build.SourceVersion)" -OutputDirectory $env:Agent_TempDirectory
+                if (-not $?) { throw "Error packaging '$nuspecFile'" }
+            }
+            else
+            {
+                "" | Write-Host -ForegroundColor Red
+                "*************************************" | Write-Host -ForegroundColor Red
+                ">>> Errors occurred, check output <<<" | Write-Host -ForegroundColor Red
+                "*************************************" | Write-Host -ForegroundColor Red
+                "" | Write-Host -ForegroundColor Red
+    
+                # set flag
+                $buildFailed = $true                  
+            }
+        }
+        catch
+        {
+            "" | Write-Host -ForegroundColor Red
+            "*************************************" | Write-Host -ForegroundColor Red
+            ">>> Errors occurred, check output <<<" | Write-Host -ForegroundColor Red
+            "*************************************" | Write-Host -ForegroundColor Red
+            "" | Write-Host -ForegroundColor Red
+
+            # set flag
+            $buildFailed = $true
+        }
+    }
+
+    if($buildFailed)
+    {      
+        exit 1
     }
   displayName: Build and pack solutions
-  
+  workingDirectory: 'nanoFramework.IoT.Device'
+  env:
+    MY_GITHUBTOKEN: $(GitHubToken)
+
 - task: CopyFiles@1
   condition: succeeded()
   displayName: Collecting deployable artifacts
@@ -199,6 +272,7 @@ steps:
     sourceFolder: $(Agent.TempDirectory)
     Contents: |
       *.nupkg
+      *.snupkg
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
     flattenFolders: true
 
@@ -214,8 +288,8 @@ steps:
     .\SignClient "Sign" `
     --baseDirectory "$(Build.ArtifactStagingDirectory)" `
     --input "**/*.nupkg" `
-    --config "$(Build.Repository.LocalPath)\config\SignClient.json" `
-    --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
+    --config "$(Build.Repository.LocalPath)\nanoFramework.IoT.Device\config\SignClient.json" `
+    --filelist "$(Build.Repository.LocalPath)\nanoFramework.IoT.Device\config\filelist.txt" `
     --user "$(SignClientUser)" `
     --secret '$(SignClientSecret)' `
     --name "IoT.Device" `
@@ -259,6 +333,7 @@ steps:
   displayName: Push READMEs to GitHub
   continueOnError: true
   inputs:
+    workingDirectory: nanoFramework.IoT.Device
     targetType: 'inline'
     script: |
       git config user.email 'nanoframework@outlook.com'

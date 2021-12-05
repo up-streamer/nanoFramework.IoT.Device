@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
-    <NanoFrameworkProjectSystemPath>$(MSBuildToolsPath)..\..\..\nanoFramework\v1.0\</NanoFrameworkProjectSystemPath>
+    <NanoFrameworkProjectSystemPath>$(MSBuildExtensionsPath)\nanoFramework\v1.0\</NanoFrameworkProjectSystemPath>
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.Default.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.Default.props')" />
   <PropertyGroup>
@@ -34,6 +34,7 @@
     <Compile Include="Commands\*.cs" />
     <Compile Include="Commands\Ssd1327Commands\*.cs" />
     <Compile Include="Commands\Ssd1306Commands\*.cs" />
+    <Compile Include="IFont.cs" />
     <Compile Include="ListByte.cs" />
     <Compile Include="Ssd1306.cs" />
     <Compile Include="Ssd1327.cs" />
