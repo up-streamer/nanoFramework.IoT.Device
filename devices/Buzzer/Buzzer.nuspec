@@ -13,7 +13,6 @@
     <readme>docs\README.md</readme>
     <developmentDependency>false</developmentDependency>
     <projectUrl>https://github.com/nanoframework/nanoFramework.IoT.Device</projectUrl>
-    <iconUrl>https://secure.gravatar.com/avatar/97d0e092247f0716db6d4b47b7d1d1ad</iconUrl>
     <icon>images\nf-logo.png</icon>
     <repository type="git" url="https://github.com/nanoframework/nanoFramework.IoT.Device" commit="$commit$" />
     <copyright>Copyright (c) .NET Foundation and Contributors</copyright>
@@ -21,11 +20,11 @@
     <summary>Iot.Device.Buzzer assembly for .NET nanoFramework C# projects</summary>
     <tags>nanoFramework C# csharp netmf netnf Iot.Device.Buzzer</tags>
     <dependencies>
-      <dependency id="nanoFramework.CoreLibrary" version="1.10.5" />
-      <dependency id="nanoFramework.System.Device.Model" version="1.0.176" />
-      <dependency id="nanoFramework.System.Device.Pwm" version="1.0.0-preview.14" />
-      <dependency id="nanoFramework.System.Math" version="1.4.1" />
-      <dependency id="UnitsNet.nanoFramework.Frequency" version="4.102.0" />
+      <dependency id="nanoFramework.CoreLibrary" version="1.11.7" />
+      <dependency id="nanoFramework.System.Device.Model" version="1.0.259" />
+      <dependency id="nanoFramework.System.Device.Pwm" version="1.0.0-preview.20" />
+      <dependency id="nanoFramework.System.Math" version="1.4.3" />
+      <dependency id="UnitsNet.nanoFramework.Frequency" version="4.110.0" />
     </dependencies>
   </metadata>
   <files>

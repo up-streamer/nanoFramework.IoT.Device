@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>nanoFramework.Iot.Device.Tcs3472x</id>
@@ -13,7 +13,6 @@
     <readme>docs\README.md</readme>
     <developmentDependency>false</developmentDependency>
     <projectUrl>https://github.com/nanoframework/nanoFramework.IoT.Device</projectUrl>
-    <iconUrl>https://secure.gravatar.com/avatar/97d0e092247f0716db6d4b47b7d1d1ad</iconUrl>
     <icon>images\nf-logo.png</icon>
     <repository type="git" url="https://github.com/nanoframework/nanoFramework.IoT.Device" commit="$commit$" />
     <copyright>Copyright (c) .NET Foundation and Contributors</copyright>
@@ -21,11 +20,11 @@
     <summary>Iot.Device.Tcs3472x assembly for .NET nanoFramework C# projects</summary>
     <tags>nanoFramework C# csharp netmf netnf Iot.Device.Tcs3472x</tags>
     <dependencies>
-      <dependency id="nanoFramework.CoreLibrary" version="1.10.5" />
-			<dependency id="nanoFramework.System.Device.I2c" version="1.0.1" />      
-      <dependency id="nanoFramework.System.Buffers.Binary.BinaryPrimitives" version="1.0.160" />
-      <dependency id="nanoFramework.System.Device.Model" version="1.0.176" />
-      <dependency id="nanoFramework.System.Drawing" version="1.0.160" />
+      <dependency id="nanoFramework.CoreLibrary" version="1.11.7" />
+      <dependency id="nanoFramework.System.Device.I2c" version="1.0.2" />
+      <dependency id="nanoFramework.System.Buffers.Binary.BinaryPrimitives" version="1.0.259" />
+      <dependency id="nanoFramework.System.Device.Model" version="1.0.259" />
+      <dependency id="nanoFramework.System.Drawing" version="1.0.259" />
     </dependencies>
   </metadata>
   <files>
@@ -34,7 +33,6 @@
     <file src="bin\Release\Iot.Device.Tcs3472x.pdbx" target="lib\Iot.Device.Tcs3472x.pdbx" />
     <file src="bin\Release\Iot.Device.Tcs3472x.pe" target="lib\Iot.Device.Tcs3472x.pe" />
     <file src="bin\Release\Iot.Device.Tcs3472x.xml" target="lib\Iot.Device.Tcs3472x.xml" />
-
     <file src="README.md" target="docs\" />
     <file src="..\..\assets\nf-logo.png" target="images" />
     <file src="..\..\LICENSE.md" target="" />
