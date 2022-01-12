@@ -17,8 +17,21 @@ mode4| Serial_LP_ASCII |   0K  |  NA          | NA
 
 ## Documentation
 
-## Usage
+* [JSN-SR04T data sheet](https://www.makerguides.com/wp-content/uploads/2019/02/JSN-SR04T-Datasheet.pdf)
 
+## Usage
+```csharp
+// Serial configuration and target selection done in Constants/ConfigSerial
+
+sensor = new Serial_HCSR04(SensorType.AJ_SR04M, Mode.Serial_LP_Bin);
+
+for (int i = 0; i < 500; i++)
+{
+    int distance = sensor.GetDistance();
+    Debug.WriteLine($"distance = {distance} mm" + $"--> count = {i}");
+    Thread.Sleep(1000);
+}
+```
 Notes:  
 LP - Low Power mode. (AJ-SR04 can go down to 20uA in stand-by).  
 BIN - Binary mode, 4 bytes sent from sensor.  
@@ -32,6 +45,6 @@ Remember: If working with 5V sensors; use voltage level shift circuits for MCU t
 # Diagram
 
 <p align="center">
-  <img src="https://github.com/up-streamer/nf_SerialHC-SR04/blob/master/nf_SerialHC-SR04_Diag.png" width="300" title="ESP32 Dev.kit v1 nf Com2">
+  <img src="https://github.com/up-streamer/nanoFramework.IoT.Device/blob/develop/devices/Jsn-sr04t/nf_SerialHC-SR04_Diag.png" width="300" title="ESP32 Dev.kit v1 nf Com2">
 </p>
 
