@@ -1,4 +1,4 @@
-# JSN-SR04T
+# JSN-SR04T - Ultrasonic Ranging Module
 Drive for JSN-SR04T, AJ-SR04 and HC-SR04 ultrasonic ranging modules
 
 This drive will work on pulse mode only on ESP32 MCUs due the use of RMT, embedded hardware particular to this chip family.
