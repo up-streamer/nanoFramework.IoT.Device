@@ -15,6 +15,10 @@ mode3|  Serial_Auto  |   120K  | Serial_Auto | 47K
 mode3|  Serial_LP_Bin |   47K  | Serial_LP_Bin | 120K
 mode4| Serial_LP_ASCII |   0K  |  NA          | NA
 
+## Documentation
+
+## Usage
+
 Notes:  
 LP - Low Power mode. (AJ-SR04 can go down to 20uA in stand-by).  
 BIN - Binary mode, 4 bytes sent from sensor.  
