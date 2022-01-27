@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO.Ports;
 using Iot.Device.Ajsr04.Constants;
 using Iot.Device.Ajsr04.Config;
+using UnitsNet;
 
 
 namespace Iot.Device.Ajsr04
@@ -35,10 +36,9 @@ namespace Iot.Device.Ajsr04
         public Status status;
 
         private int distance;
-        public int Distance
+        public Length Distance
         {
-            set { distance = value; }
-            get { return distance; }
+            get { return Length.FromMillimeters(distance); }
         }
 
         private int readInterval;
