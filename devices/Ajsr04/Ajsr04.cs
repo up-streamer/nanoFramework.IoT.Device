@@ -1,11 +1,13 @@
 ﻿// NOTE: when working with ESP32 this define needs to be uncommented
 #define BUIID_FOR_ESP32
 
+using System;
 using System.Threading;
 using System.Diagnostics;
 using System.IO.Ports;
 using Iot.Device.Ajsr04.Constants;
 using Iot.Device.Ajsr04.Config;
+
 
 namespace Iot.Device.Ajsr04
 {
@@ -159,7 +161,6 @@ namespace Iot.Device.Ajsr04
                     }
                     return;
             }
-
         }
 
         private void NewValues(int dist, Status sta)
@@ -282,15 +283,15 @@ namespace Iot.Device.Ajsr04
         /// </summary>
         public void Dispose()
         {
-            if (Device is { IsOpen: true })
+            if (Serial.Device is { IsOpen: true })
             {
-                Device.Close();
+                Serial.Device.Close();
             }
 
-            Device?.Dispose();
-            Device = null!;
+            Serial.Device?.Dispose();
+            Serial.Device = null!;
         }
-
+    }
     class GetDistanceAUTO
     {
         private readonly _NewValuesCallback NewValues;
