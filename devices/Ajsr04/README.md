@@ -27,8 +27,8 @@ sensor = new Serial_HCSR04(SensorType.AJ_SR04M, Mode.Serial_LP_Bin);
 
 for (int i = 0; i < 500; i++)
 {
-    int distance = sensor.GetDistance();
-    Debug.WriteLine($"distance = {distance} mm" + $"--> count = {i}");
+    Length distance = sensor.GetDistance();
+    Debug.WriteLine($"distance = {distance.Millimeters} mm" + $"--> count = {i}");
     Thread.Sleep(1000);
 }
 ```
@@ -38,7 +38,8 @@ BIN - Binary mode, 4 bytes sent from sensor.
 ASCII - ASCII mode, 12 bytes sent from sensor. 
 Serial_Auto AJ-SR04 will produce a fix 100ms sample rate in binary mode, 
 this mode was implemented using Timer instead to allow modify sample rate. Set resitors to Serial_LP_Bin for both sensors.  
-Due this, the minimum time between samples will be 150ms. 
+Due this, the minimum time between samples will be 150ms.  
+The sensor does not sends CRC in ASCII mode. The drive just check if the data frame is correct and probably the data will be too.  
 For generic HC-SR04; select Pulse mode.  
 Trigger and Echo pins are defaulted to serial port pins for ESP32, to allow tests without changing wires.  
 Remember: If working with 5V sensors; use voltage level shift circuits for MCU that aren't 5V tolerant, as ESP32.
