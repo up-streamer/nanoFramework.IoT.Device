@@ -46,6 +46,6 @@ Remember: If working with 5V sensors; use voltage level shift circuits for MCU t
 # Diagram
 
 <p align="center">
-  <img src="https://github.com/up-streamer/nanoFramework.IoT.Device/blob/develop/devices/Jsn-sr04t/nf_SerialHC-SR04_Diag.png" width="300" title="ESP32 Dev.kit v1 nf Com2">
+  <img src="https://github.com/up-streamer/nanoFramework.IoT.Device/blob/develop/devices/Ajsr04/nf_SerialHC-SR04_Diag.png" width="300" title="ESP32 Dev.kit v1 nf Com2">
 </p>
 
