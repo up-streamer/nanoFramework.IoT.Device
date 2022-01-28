@@ -17,8 +17,8 @@ namespace Sample_Ajsr04
 
             //for (int i = 0; i < 500; i++)
             //{
-            //    int distance = sensor.GetDistance();
-            //    Debug.WriteLine($"distance = {distance} mm" + $"--> count = {i}");
+            //    Length distance = sensor.GetDistance();
+            //    Debug.WriteLine($"distance = {distance.Millimeters} mm" + $"--> count = {i}");
             //    Thread.Sleep(1000);
             //}
 
