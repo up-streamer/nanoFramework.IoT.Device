@@ -169,11 +169,11 @@ namespace Iot.Device.Ajsr04
             status = sta;
         }
 
-        public int GetDistance()
+        public Length GetDistance()
         {
             status = Status.Ok;
             SensorPing(ping);
-            return _GetDistance();
+            return Length.FromMillimeters(_GetDistance());
         }
 
         private void SensorPing(byte[] ping)
