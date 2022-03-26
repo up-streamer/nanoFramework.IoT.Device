@@ -1,3 +1,6 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
 trigger:
   branches:
     include:
@@ -63,6 +66,8 @@ steps:
 - task: InstallnFBuildComponents@1
   condition: succeeded()
   displayName: Install nanoFramework MSBuild components
+  env:
+    GITHUB_TOKEN: $(GitHubToken)
 
 # build solutions that need to be build
 - task: PowerShell@2
