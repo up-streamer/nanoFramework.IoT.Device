@@ -52,7 +52,7 @@ if($env:DEVICE_TO_BUILD -eq "")
     {
         "" | Write-Host -ForegroundColor Yellow
         "*****************************************************************" | Write-Host -ForegroundColor Yellow
-        "* Building from commit $Build_SourceVersion *" | Write-host -ForegroundColor Yellow
+        "* Building from commit $env:Build_SourceVersion *" | Write-host -ForegroundColor Yellow
         "*****************************************************************" | Write-Host -ForegroundColor Yellow
         "" | Write-Host -ForegroundColor Yellow
 
@@ -63,7 +63,7 @@ if($env:DEVICE_TO_BUILD -eq "")
         {
             "INFO: iteration $pageCounter" | Write-Host
 
-            $batch = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nanoFramework.IoT.Device/commits/$Build_SourceVersion`?per_page=100&page=$pageCounter" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+            $batch = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nanoFramework.IoT.Device/commits/$env:Build_SourceVersion`?per_page=100&page=$pageCounter" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
             if($null -eq $commit)
             {
@@ -79,11 +79,11 @@ if($env:DEVICE_TO_BUILD -eq "")
         } until ($batch.files.Count -eq 0)
 
         # filter removed files              
-        $files = $commit.where{$_.status -ne 'removed'}
+        $files = $commit.where{$_.status -ne 'removed' -and $_.filename -match '(devices)'}
     }
 
-    # get file names only
-    $files1 = $files | ForEach-Object {$_.filename} | Where-Object {$_ -match 'devices/*'} 
+    # get file names only (filter out samples folders)
+    $files1 = $files | ForEach-Object {$_.filename} | Where-Object {$_ -match '^((?!samples).)*$'} 
 
     if($null -eq $files1)
     {
