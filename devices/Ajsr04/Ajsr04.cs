@@ -25,13 +25,11 @@ namespace Iot.Device.Ajsr04
         public readonly Mode sensorMode;
 
         readonly ConfigSerial Serial = new();
-        readonly ConfigRMT RMT = new();
         private delegate int GetDistanceDelegate();
         GetDistanceDelegate _GetDistance;
         private static Timer _GetDistanceTimer;
 
-        private int TriggerPin = 0;
-        private int EchoPin = 0;
+        private readonly int TriggerPin = 0;
 
         public Status status;
 
@@ -57,7 +55,7 @@ namespace Iot.Device.Ajsr04
         }
 
         // * For debuging raw data from sensor *
-        PrintRaw PR = new();
+        readonly PrintRaw PR = new();
 
         /// <summary>
         /// Constructor module
@@ -108,39 +106,16 @@ namespace Iot.Device.Ajsr04
 
         private void ConfigPins(Mode sensorMode)
         {
-            if ((sensorMode == Mode.Pulse) || (sensorMode == Mode.Pulse_LP))
-            {
-                // Change to suit your hardware set-up
-                // if one of them is not configured, both will default to 16 and 17 
-                if (TriggerPin == 0 || EchoPin == 0)
-                {
-                    TriggerPin = 17;
-                    EchoPin = 16;
-                }
-                RMT.Config(TriggerPin, EchoPin);
-            }
-            else
-            {
                 if (sensorMode != Mode.Serial_Auto)
                 {
                     Serial.Config(port);
                 }
-            }
         }
 
         private void ConfigMode(Mode sensorMode)
         {
             switch (sensorMode)
             {
-#if BUIID_FOR_ESP32
-                case Mode.Pulse:
-                    _GetDistance = GetDistancePULSE;
-                    return;
-
-                case Mode.Pulse_LP:
-                    _GetDistance = GetDistancePULSE;
-                    return;
-#endif
                 case Mode.Serial_Auto:
                     GetDistanceAUTO gda = new(port, sensorType, NewValues);
                     _GetDistanceTimer = new Timer(gda.ThreadProcess, null, 0, readInterval);
@@ -183,42 +158,6 @@ namespace Iot.Device.Ajsr04
                 Serial.Device.Write(ping, 0, ping.Length);
                 Thread.Sleep(50);
             }
-            else
-            {
-                // Send 10us pulse
-                RMT._txChannel.Send(true);
-            }
-        }
-
-        private int GetDistancePULSE()
-        {
-            var response = RMT.response;
-            RMT._rxChannel.Start(true);
-
-            // Try 5 times to get valid response
-            for (int count = 0; count < 5; count++)
-            {
-                response = RMT._rxChannel.GetAllItems();
-                if (response != null)
-                    break;
-
-                // Retry every 60 ms
-                Thread.Sleep(60);
-            }
-
-            RMT._rxChannel.Stop();
-
-            if (response == null)
-            {
-                status = Status.TimeOut;
-                return -1;
-            }
-            // Echo pulse width in micro seconds
-            int duration = response[0].Duration0;
-
-            // Calculate distance in milimeters
-            // Distance calculated as  (speed of sound) * duration(miliseconds) / 2 
-            return (int)Constant.Speed_of_Sound * duration / (1000 * 2);
         }
 
         private int GetDistanceBIN()
@@ -303,7 +242,7 @@ namespace Iot.Device.Ajsr04
         uint sum;
 
         // * To debug raw data from sensor *
-        PrintRaw PR = new PrintRaw();
+        readonly PrintRaw PR = new();
 
         /// <summary>
         /// Constructor module
