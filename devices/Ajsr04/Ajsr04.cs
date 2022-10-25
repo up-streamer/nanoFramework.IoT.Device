@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Diagnostics;
 using System.IO.Ports;
+using System.Device.Model;
 using Iot.Device.Ajsr04.Constants;
 using Iot.Device.Ajsr04.Config;
 using UnitsNet;
@@ -13,7 +14,10 @@ using UnitsNet;
 namespace Iot.Device.Ajsr04
 {
     public delegate void _NewValuesCallback(int distance, Status sta);
-
+    /// <summary>
+    /// AJ-SR04 - Ultrasonic Ranging Module
+    /// </summary>
+    [Interface("AJ-SR04 - Ultrasonic Ranging Module")]
     public class Ajsr04 : IDisposable
     {
         byte[] data;
@@ -58,8 +62,10 @@ namespace Iot.Device.Ajsr04
         readonly PrintRaw PR = new();
 
         /// <summary>
-        /// Constructor module
+        /// Creates a new instance of the AJ-SCR04 sonar.
         /// </summary>
+        /// <param name="SensorType">Define Tx ping byte</param>
+        /// <param name="Mode">Define Sensor operating mode, match to mode resistor on PCB</param>
         public Ajsr04(SensorType type, Mode mode)
         {
             status = Status.Ok;
@@ -67,7 +73,7 @@ namespace Iot.Device.Ajsr04
             sensorType = type;
             // Define Sensor mode
             sensorMode = mode;
-            // Define ping byte accord sensorType
+            // Define ping byte according to sensorType
             ping[0] = (byte)sensorType;
             // Default ReadInterval to GetDistanceAUTO;
             readInterval = 1000;
@@ -144,6 +150,10 @@ namespace Iot.Device.Ajsr04
             status = sta;
         }
 
+        /// <summary>
+        /// Gets the current distance, usual range from 20 cm to 600 cm.
+        /// </summary>
+        [Telemetry]
         public Length GetDistance()
         {
             status = Status.Ok;
@@ -245,7 +255,7 @@ namespace Iot.Device.Ajsr04
         readonly PrintRaw PR = new();
 
         /// <summary>
-        /// Constructor module
+        /// Constructor delegates automatic ping mode
         /// </summary>
         public GetDistanceAUTO(string port, SensorType sensorType, _NewValuesCallback NV)
         {
