@@ -1,4 +1,7 @@
-﻿// NOTE: when working with ESP32 this define needs to be uncommented
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// NOTE: when working with ESP32 this define needs to be uncommented
 #define BUIID_FOR_ESP32
 
 using System;
@@ -20,20 +23,20 @@ namespace Iot.Device.Ajsr04
     [Interface("AJ-SR04 - Ultrasonic Ranging Module")]
     public class Ajsr04 : IDisposable
     {
-        byte[] data;
-        uint sum;
-        uint dataCheck;
-        private readonly byte[] ping = new byte[1];
+        private byte[] _data;
+        private uint _sum;
+        private uint _dataCheck;
+        private readonly byte[] _ping = new byte[1];
         private readonly string port;
         public readonly SensorType sensorType;
         public readonly Mode sensorMode;
 
-        readonly ConfigSerial Serial = new();
+        readonly ConfigSerial _serial = new();
         private delegate int GetDistanceDelegate();
-        GetDistanceDelegate _GetDistance;
-        private static Timer _GetDistanceTimer;
+        GetDistanceDelegate _getDistance;
+        private static Timer _getDistanceTimer;
 
-        private readonly int TriggerPin = 0;
+        private readonly int _triggerPin = 0;
 
         public Status status;
 
@@ -43,18 +46,18 @@ namespace Iot.Device.Ajsr04
             get { return Length.FromMillimeters(distance); }
         }
 
-        private int readInterval;
+        private int _readInterval;
         public int ReadInterval
         {
             set
             {
-                readInterval -= 100;
-                readInterval = readInterval < 100 ? 100 : value;
-                _GetDistanceTimer.Change(0, readInterval);
+                _readInterval -= 100;
+                _readInterval = _readInterval < 100 ? 100 : value;
+                _getDistanceTimer.Change(0, _readInterval);
             }
             get
             {
-                return readInterval;
+                return _readInterval;
             }
         }
 
@@ -74,9 +77,9 @@ namespace Iot.Device.Ajsr04
             // Define Sensor mode
             sensorMode = mode;
             // Define ping byte according to sensorType
-            ping[0] = (byte)sensorType;
+            _ping[0] = (byte)sensorType;
             // Default ReadInterval to GetDistanceAUTO;
-            readInterval = 1000;
+            _readInterval = 1000;
 
             // List available ports
             var serialPorts = SerialPort.GetPortNames();
@@ -114,7 +117,7 @@ namespace Iot.Device.Ajsr04
         {
                 if (sensorMode != Mode.Serial_Auto)
                 {
-                    Serial.Config(port);
+                    _serial.Config(port);
                 }
         }
 
@@ -124,21 +127,21 @@ namespace Iot.Device.Ajsr04
             {
                 case Mode.Serial_Auto:
                     GetDistanceAUTO gda = new(port, sensorType, NewValues);
-                    _GetDistanceTimer = new Timer(gda.ThreadProcess, null, 0, readInterval);
+                    _getDistanceTimer = new Timer(gda.ThreadProcess, null, 0, _readInterval);
                     return;
 
                 case Mode.Serial_LP_Bin:
-                    _GetDistance = GetDistanceBIN;
+                    _getDistance = GetDistanceBIN;
                     return;
 
                 case Mode.Serial_LP_ASCII:
                     if (sensorType == SensorType.AJ_SR04M)
                     {
-                        _GetDistance = GetDistanceASCII;
+                        _getDistance = GetDistanceASCII;
                     }
                     else
                     {
-                        _GetDistance = GetDistanceBIN;
+                        _getDistance = GetDistanceBIN;
                     }
                     return;
             }
@@ -157,15 +160,15 @@ namespace Iot.Device.Ajsr04
         public Length GetDistance()
         {
             status = Status.Ok;
-            SensorPing(ping);
-            return Length.FromMillimeters(_GetDistance());
+            SensorPing(_ping);
+            return Length.FromMillimeters(_getDistance());
         }
 
         private void SensorPing(byte[] ping)
         {
-            if (TriggerPin == 0)
+            if (_triggerPin == 0)
             {
-                Serial.Device.Write(ping, 0, ping.Length);
+                _serial.Device.Write(ping, 0, ping.Length);
                 Thread.Sleep(50);
             }
         }
@@ -174,19 +177,19 @@ namespace Iot.Device.Ajsr04
         {
             // Attempt to read 4 bytes from the Serial Device input stream
             // Format: 0XFF + H_DATA + L_DATA + SUM
-            if (Serial.Device.BytesToRead == 4)
+            if (_serial.Device.BytesToRead == 4)
             {
-                data = new byte[Serial.Device.BytesToRead];
-                Serial.Device.Read(data, 0, data.Length);
+                _data = new byte[_serial.Device.BytesToRead];
+                _serial.Device.Read(_data, 0, _data.Length);
 
-                distance = (data[1] << 8) | data[2];
-                sum = data[3];
-                dataCheck = (uint)(data[0] + data[1] + data[2] + 1) & 0x00ff;
+                distance = (_data[1] << 8) | _data[2];
+                _sum = _data[3];
+                _dataCheck = (uint)(_data[0] + _data[1] + _data[2] + 1) & 0x00ff;
 
                 // * For debuging data received *
-                PR.ViewData(data, sum, dataCheck);
+                PR.ViewData(_data, _sum, _dataCheck);
 
-                if (dataCheck == sum)
+                if (_dataCheck == _sum)
                 {
                     return distance;
                 }
@@ -204,19 +207,19 @@ namespace Iot.Device.Ajsr04
             //RX = 71 97 112 61 49 56 56 49 109 109 13 10
             //      G  a   p  =  1  8  8  1   m   m CR LF
 
-            if (Serial.Device.BytesToRead == 12)
+            if (_serial.Device.BytesToRead == 12)
             {
-                data = new byte[Serial.Device.BytesToRead];
-                Serial.Device.Read(data, 0, data.Length);
+                _data = new byte[_serial.Device.BytesToRead];
+                _serial.Device.Read(_data, 0, _data.Length);
 
-                distance = ((data[4] - 48) * 1000) + ((data[5] - 48) * 100) + ((data[6] - 48) * 10) + ((data[7] - 48));
-                sum = (uint)data[0] + data[1] + data[2] + data[3] + data[8] + data[9] + data[10] + data[11];
-                dataCheck = 582;
+                distance = ((_data[4] - 48) * 1000) + ((_data[5] - 48) * 100) + ((_data[6] - 48) * 10) + ((_data[7] - 48));
+                _sum = (uint)_data[0] + _data[1] + _data[2] + _data[3] + _data[8] + _data[9] + _data[10] + _data[11];
+                _dataCheck = 582;
 
                 // * For debuging data received *
-                PR.ViewData(data, sum, dataCheck);
+                PR.ViewData(_data, _sum, _dataCheck);
 
-                if (dataCheck == sum)
+                if (_dataCheck == _sum)
                 {
                     return distance;
                 }
@@ -232,21 +235,21 @@ namespace Iot.Device.Ajsr04
         /// </summary>
         public void Dispose()
         {
-            if (Serial.Device is { IsOpen: true })
+            if (_serial.Device is { IsOpen: true })
             {
-                Serial.Device.Close();
+                _serial.Device.Close();
             }
 
-            Serial.Device?.Dispose();
-            Serial.Device = null!;
+            _serial.Device?.Dispose();
+            _serial.Device = null!;
         }
     }
     class GetDistanceAUTO
     {
         private readonly _NewValuesCallback NewValues;
-        readonly ConfigSerial Serial = new();
-        readonly byte[] pingByte = new byte[1];
-        readonly byte[] data = new byte[4]; //To save incoming bytes
+        private readonly ConfigSerial _serial = new();
+        private readonly byte[] _pingByte = new byte[1];
+        private readonly byte[] _data = new byte[4]; //To save incoming bytes
         uint dataCheck;
         private int distance;
         uint sum;
@@ -259,26 +262,26 @@ namespace Iot.Device.Ajsr04
         /// </summary>
         public GetDistanceAUTO(string port, SensorType sensorType, _NewValuesCallback NV)
         {
-            Serial.Config(port);
-            pingByte[0] = (byte)sensorType;
+            _serial.Config(port);
+            _pingByte[0] = (byte)sensorType;
 
             NewValues = NV;
         }
 
         public void ThreadProcess(object state)
         {
-            Serial.Device.Write(pingByte, 0, pingByte.Length);
+            _serial.Device.Write(_pingByte, 0, _pingByte.Length);
             Thread.Sleep(50);
 
-            if (Serial.Device.BytesToRead == 4)
+            if (_serial.Device.BytesToRead == 4)
             {
-                Serial.Device.Read(data, 0, data.Length);
+                _serial.Device.Read(_data, 0, _data.Length);
 
-                distance = (data[1] << 8) | data[2];
-                sum = data[3];
-                dataCheck = (uint)(data[0] + data[1] + data[2] + 1) & 0x00ff;
+                distance = (_data[1] << 8) | _data[2];
+                sum = _data[3];
+                dataCheck = (uint)(_data[0] + _data[1] + _data[2] + 1) & 0x00ff;
 
-                PR.ViewData(data, sum, dataCheck);
+                PR.ViewData(_data, sum, dataCheck);
 
                 if (dataCheck == sum)
                 {
