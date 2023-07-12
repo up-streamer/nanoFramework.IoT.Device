@@ -16,9 +16,9 @@
       },
       "Nerdbank.GitVersioning": {
         "type": "Direct",
-        "requested": "[3.5.119, 3.5.119]",
-        "resolved": "3.5.119",
-        "contentHash": "x8k4zV6YKZA5Rr810439lG9NngdbyPtFv0QpIYz32m1Im59kvSbEHO8gKGZoNvsfZSquayjEDUCa8acbut372g=="
+        "requested": "[3.6.133, 3.6.133]",
+        "resolved": "3.6.133",
+        "contentHash": "VZWMd5YAeDxpjWjAP/X6bAxnRMiEf6tES/ITN0X5CHJgkWLLeHGmEALivmTAfYM6P+P/3Szy6VCITUAkqjcHVw=="
       },
       "StyleCop.MSBuild": {
         "type": "Direct",
@@ -28,27 +28,27 @@
       },
       "UnitsNet.nanoFramework.Length": {
         "type": "Direct",
-        "requested": "[5.0.0-rc009, 5.0.0-rc009]",
-        "resolved": "5.0.0-rc009",
-        "contentHash": "428hwcfFk1OngkQRfIqKYZcGcmcIe7roa3KaisjxuItBV5gZi1gkfaG3za/LRolvgAkO3CK+4lv7KiaZti+6cg=="
+        "requested": "[5.24.0, 5.24.0]",
+        "resolved": "5.24.0",
+        "contentHash": "/EyLq85HT6fu0Zz3Zv4LGXIRnK2J24xhebFNzlAxX5nJWUfSFIuCkj2rZZlzcldYDuz0WTUFcEin+9sx58iH9Q=="
       },
       "UnitsNet.nanoFramework.Pressure": {
         "type": "Direct",
-        "requested": "[5.0.0-rc009, 5.0.0-rc009]",
-        "resolved": "5.0.0-rc009",
-        "contentHash": "Rl/LvMuHQCary6kMgO40f9k/VdM7fduN4Es/NUPnAlMtHxh5sor2J/Lj3mV+nkpe62zOVeU0B1HE6/8Cs6GbDA=="
+        "requested": "[5.24.0, 5.24.0]",
+        "resolved": "5.24.0",
+        "contentHash": "e69nuaBf0Aq0a4pT5dne3LX/uYi+L92ANuK0XRKeAUeV4olS7cq7hRDUc7zilWoA8FkOrt/Y7oqBwciLm5n1RQ=="
       },
       "UnitsNet.nanoFramework.RelativeHumidity": {
         "type": "Direct",
-        "requested": "[5.0.0-rc009, 5.0.0-rc009]",
-        "resolved": "5.0.0-rc009",
-        "contentHash": "UNd2HeRPJ29w6Rqb2eFG85gZ4KaFgTkJKhuOoXqOhZZfqycHClnk1FtZSUaCR3QJGIdyGY3DNWDJCMGOX7oEvg=="
+        "requested": "[5.24.0, 5.24.0]",
+        "resolved": "5.24.0",
+        "contentHash": "mtTKFWUTQn/SjNGAnwXYPC4SwCoz6IUdhKhzFbUhQt8q7MU7ADWh+5ptgvj3NP9DFF/EZ4vHY/j44rX34D2W+w=="
       },
       "UnitsNet.nanoFramework.Temperature": {
         "type": "Direct",
-        "requested": "[5.0.0-rc009, 5.0.0-rc009]",
-        "resolved": "5.0.0-rc009",
-        "contentHash": "6yRKIxhiD4rYfewnRpYhi9cy3FjDCsyR31qwvEA2jrd8sUFqUva0eEL2l6GmtZYlzFI5D9KRG4pz5W4M7wkXYQ=="
+        "requested": "[5.24.0, 5.24.0]",
+        "resolved": "5.24.0",
+        "contentHash": "15zN/c3+byYXU3R38jRhNjaTFs8bcHytxZsI94b6zln/TynPV6bYdgz0VNO18g7NidP80mO/Z0JM+6iUTWDF3g=="
       }
     }
   }
